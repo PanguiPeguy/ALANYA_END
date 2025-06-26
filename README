@@ -1,0 +1,3 @@
+        Pour lancer le programme tu par dans loginPage a la ligne 35-37 tu mets tes information puis dans DatabaseService a la ligne 16-18 tu met aussi tes infos. puis pour lancer l'appel audio tu doit
+    tu doit modifer les address ip manuelement au niveau de media service ligne 821 et dans VideoCallService ligne 263. Avant de lancer le client tu lance le serveur et puis c'est bon. mais il te faut la bd
+    dans ta machine bien sur ca se trouve dans les ressources (le code sql)

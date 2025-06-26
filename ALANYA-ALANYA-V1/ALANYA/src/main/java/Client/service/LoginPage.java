@@ -28,11 +28,11 @@ import java.sql.ResultSet;
 
 public class LoginPage extends Application {
 
-    private static final String DEFAULT_HOST = "10.2.61.28";
+    private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 8080;
 
     // Base de données configuration
-    private static final String DB_URL = "jdbc:mysql://0.0.0.0:3306/ALANYA_BD";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/ALANYA_BD";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "22p3?9";
 

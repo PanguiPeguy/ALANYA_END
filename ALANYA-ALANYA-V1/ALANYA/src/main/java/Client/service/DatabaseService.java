@@ -13,7 +13,7 @@ public class DatabaseService {
     public DatabaseService() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            String url = "jdbc:mysql://0.0.0.0:3306/ALANYA_BD?useSSL=false&serverTimezone=UTC";
+            String url = "jdbc:mysql://localhost:3306/ALANYA_BD?useSSL=false&serverTimezone=UTC";
             String dbUser = "root";
             String dbPassword = "22p3?9";
             connection = DriverManager.getConnection(url, dbUser, dbPassword);
