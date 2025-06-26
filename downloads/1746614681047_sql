@@ -1,0 +1,120 @@
+-- Création de la base de données
+CREATE DATABASE IF NOT EXISTS alanya_chat;
+USE alanya_chat;
+
+-- Table des utilisateurs
+CREATE TABLE IF NOT EXISTS users (
+    userId INT PRIMARY KEY AUTO_INCREMENT,
+    userName VARCHAR(50) NOT NULL,
+    phoneNumber VARCHAR(20) NOT NULL UNIQUE,
+    profilePicture VARCHAR(255),
+    codeAccess VARCHAR(255) NOT NULL,
+    registrationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des utilisateurs connectés
+CREATE TABLE IF NOT EXISTS connected_users (
+    connectedUserId INT PRIMARY KEY AUTO_INCREMENT,
+    userId INT NOT NULL,
+    status BOOLEAN DEFAULT false,
+    timeLastConnection TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ipAddress VARCHAR(45),
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des contacts
+CREATE TABLE IF NOT EXISTS contacts (
+    contactId INT PRIMARY KEY AUTO_INCREMENT,
+    userId INT NOT NULL,
+    contactUserId INT NOT NULL,
+    blocked BOOLEAN DEFAULT false,
+    nickname VARCHAR(50),
+    addedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
+    FOREIGN KEY (contactUserId) REFERENCES users(userId) ON DELETE CASCADE,
+    UNIQUE KEY unique_contact (userId, contactUserId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des messages
+CREATE TABLE IF NOT EXISTS messages (
+    messageId INT PRIMARY KEY AUTO_INCREMENT,
+    senderId INT NOT NULL,
+    receiverId INT NOT NULL,
+    content TEXT,
+    mediaUrl VARCHAR(255),
+    status ENUM('SENT', 'DELIVERED', 'READ') DEFAULT 'SENT',
+    deleted BOOLEAN DEFAULT false,
+    sendMessageTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderId) REFERENCES users(userId) ON DELETE CASCADE,
+    FOREIGN KEY (receiverId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des groupes
+CREATE TABLE IF NOT EXISTS groups_chat (
+    groupId INT PRIMARY KEY AUTO_INCREMENT,
+    groupName VARCHAR(50) NOT NULL,
+    groupPicture VARCHAR(255),
+    adminId INT NOT NULL,
+    creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (adminId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des membres des groupes
+CREATE TABLE IF NOT EXISTS group_members (
+    groupId INT NOT NULL,
+    userId INT NOT NULL,
+    joinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (groupId, userId),
+    FOREIGN KEY (groupId) REFERENCES groups_chat(groupId) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des messages de groupe
+CREATE TABLE IF NOT EXISTS group_messages (
+    messageId INT PRIMARY KEY AUTO_INCREMENT,
+    groupId INT NOT NULL,
+    senderId INT NOT NULL,
+    content TEXT,
+    mediaUrl VARCHAR(255),
+    deleted BOOLEAN DEFAULT false,
+    sendMessageTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (groupId) REFERENCES groups_chat(groupId) ON DELETE CASCADE,
+    FOREIGN KEY (senderId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des lectures de messages de groupe
+CREATE TABLE IF NOT EXISTS group_message_reads (
+    messageId INT NOT NULL,
+    userId INT NOT NULL,
+    readTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (messageId, userId),
+    FOREIGN KEY (messageId) REFERENCES group_messages(messageId) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table des appels
+CREATE TABLE IF NOT EXISTS calls (
+    callId INT PRIMARY KEY AUTO_INCREMENT,
+    callerId INT NOT NULL,
+    receiverId INT NOT NULL,
+    callType ENUM('AUDIO', 'VIDEO') NOT NULL,
+    status ENUM('INITIATING', 'RINGING', 'ACCEPTED', 'REJECTED', 'IN_PROGRESS', 'ENDED') NOT NULL,
+    startTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    endTime TIMESTAMP NULL,
+    FOREIGN KEY (callerId) REFERENCES users(userId) ON DELETE CASCADE,
+    FOREIGN KEY (receiverId) REFERENCES users(userId) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Index pour optimiser les recherches
+CREATE INDEX idx_messages_sender ON messages(senderId);
+CREATE INDEX idx_messages_receiver ON messages(receiverId);
+CREATE INDEX idx_messages_time ON messages(sendMessageTime);
+CREATE INDEX idx_group_messages_time ON group_messages(sendMessageTime);
+CREATE INDEX idx_connected_users_status ON connected_users(status);
+CREATE INDEX idx_contacts_blocked ON contacts(blocked);
+
+-- Insertion de quelques utilisateurs de test
+INSERT INTO users (userName, phoneNumber, codeAccess) VALUES 
+('Alice', '601234567', '1234'),
+('Bob', '602345678', '1234'),
+('Charlie', '603456789', '1234');
